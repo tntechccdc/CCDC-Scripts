@@ -5,9 +5,9 @@ used for password generation
 the seed for the random number generator is something that the user enters, which makes the password
     regeneratable given the same "key", and because of this i'm not sure how "cryptographically secure" this is
 """
-import optparse
 import random
 import binascii
+import argparse
 
 #pre: filename is a string that is the name of the file where the key is contained
 #post: an integer is returned that is generated randomly based on the key
@@ -78,8 +78,8 @@ def makePass(filename):
     
 #seeds the RNG, i made this separate because sometimes I like to make my "random" sets reproducible
 #but other times i want to seed the RNG with something more secure, like the current time or whatnot
-def seedRNG():
-    random.seed(processKey(raw_input("enter key: ")))
+def seedRNG(key):
+    random.seed(processKey(key))
     
 def toFile(filename, words):
     f = open(filename, "w")
@@ -88,23 +88,22 @@ def toFile(filename, words):
     f.close()
 
 if __name__ == "__main__":
-    seedRNG()
-    numPasses = int(raw_input("how many passwords do you want to generate? "))
+    parser = argparse.ArgumentParser()
+    parser.add_argument("key", help="This is the key used to seed the rng")
+    parser.add_argument("infile", help="The input file to grab words from")
+    parser.add_argument("-c", "--count", help="The number of passwords to generate", type=int)
+    args = parser.parse_args()
+
+    key = args.key
+    numPasses=5
+    if args.count:
+        numPasses=args.count
+
+    seedRNG(key)
     
-    allpasses = []
     i=0
     
-    print "\n"
     while i < numPasses:
-        currPass = makePass("nounlist.txt")
+        currPass = makePass(args.infile)
         print currPass
-        allpasses.append(currPass)
         i += 1
-    print "\n"
-        
-    choice = raw_input("do you want me to write these to a .txt file? (y/n) ")
-    if choice == "y" or choice == "Y":
-        filename = raw_input("what shall we call this file? (omit extension) ") + ".txt"
-        toFile(filename, allpasses)
-        print "file written"
-    
