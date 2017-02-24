@@ -1,6 +1,6 @@
 #Sam Wehunt 9/30/2015
 """
-this script finds four random words from a file (nounlist.txt) and displays them
+this script finds some random words from a file (nounlist.txt) and displays them
 used for password generation
 the seed for the random number generator is something that the user enters, which makes the password
     regeneratable given the same "key", and because of this i'm not sure how "cryptographically secure" this is
@@ -65,15 +65,14 @@ def getSpec(special):
     }[special % 8]
     
 #takes in a filename, and smacks four random lines from it together like [1-2-3-4], instapassword
-def makePass(filename):
+def makePass(filename, num):
     numlines = countLines(filename)
-    finalPass1 = capWord(getLine(filename, random.randrange(1, numlines, 1)))
-    finalPass2 = capWord(getLine(filename, random.randrange(1, numlines, 1)))
-    finalPass3 = capWord(getLine(filename, random.randrange(1, numlines, 1)))
- 
-    finalPass = finalPass1 + getSpec(random.randrange(0, 8, 1))
-    finalPass += finalPass2 + getSpec(random.randrange(0, 8, 1))
-    finalPass += finalPass3 + str(random.randrange(0, 10, 1))
+    finalPass = ""
+
+    for i in range(0, num):
+        finalPass += capWord(getLine(filename, random.randrange(1, numlines, 1)))
+        finalPass += getSpec(random.randrange(0, 8, 1))
+
     return finalPass
     
 #seeds the RNG, i made this separate because sometimes I like to make my "random" sets reproducible
@@ -92,6 +91,7 @@ if __name__ == "__main__":
     parser.add_argument("key", help="This is the key used to seed the rng")
     parser.add_argument("infile", help="The input file to grab words from")
     parser.add_argument("-c", "--count", help="The number of passwords to generate", type=int)
+    parser.add_argument("-l", "--length", help="the number of words per password", type=int)
     args = parser.parse_args()
 
     key = args.key
@@ -104,6 +104,6 @@ if __name__ == "__main__":
     i=0
     
     while i < numPasses:
-        currPass = makePass(args.infile)
+        currPass = makePass(args.infile, args.length)
         print currPass
         i += 1
